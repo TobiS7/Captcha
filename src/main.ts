@@ -66,8 +66,7 @@ const PUZZLE_DEADLINE_MS = 85000;
 const CODE_ENTRY_DEADLINE_MS = 22000;
 const HOTLINE_MENU_DELAY_MS = 7000;
 const HOTLINE_RESPONSE_WINDOW_MS = 6000;
-const LUNGAU_VIEW_CENTER: [number, number] = [47.125, 13.72];
-const LUNGAU_VIEW_ZOOM = 11.75;
+const LUNGAU_MAP_PADDING_RATIO = 0.22;
 const solvedPuzzle = [1, 2, 3, 4, 5, 6, 7, 8, 0];
 const ASSET_BASE = import.meta.env.BASE_URL;
 const puzzleImageUrl = `${ASSET_BASE}captcha-assets/capthaimages/112.jpg`;
@@ -332,6 +331,10 @@ function createCombinations<T>(values: T[], size: number): T[][] {
 
 function getDistanceKm(a: L.LatLngExpression, b: L.LatLngExpression) {
   return L.latLng(a).distanceTo(L.latLng(b)) / 1000;
+}
+
+function getLungauMapBounds() {
+  return L.latLngBounds(lungauTargets.map((location) => location.coords)).pad(LUNGAU_MAP_PADDING_RATIO);
 }
 
 function numericCodePart(code: string) {
@@ -927,12 +930,23 @@ function renderMap() {
     zoomControl: false,
     zoomSnap: 0.25,
     zoomDelta: 0.25,
-  }).setView(LUNGAU_VIEW_CENTER, LUNGAU_VIEW_ZOOM);
+  });
 
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; OpenStreetMap",
     maxZoom: 19,
   }).addTo(map);
+
+  const lungauBounds = getLungauMapBounds();
+
+  map.fitBounds(lungauBounds, {
+    padding: [28, 28],
+  });
+  map.setMaxBounds(lungauBounds);
+
+  const lockedZoom = map.getZoom();
+  map.setMinZoom(lockedZoom);
+  map.setMaxZoom(lockedZoom);
 
   lungauTargets.forEach((location) => {
     const marker = L.circleMarker(location.coords, {
