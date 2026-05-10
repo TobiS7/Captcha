@@ -381,6 +381,7 @@ input:focus {
 .captcha-card {
   width: min(420px, 100%);
   overflow: hidden;
+  padding: 16px;
   border-radius: 18px;
   border: 1px solid var(--line-strong);
   background: rgba(12, 18, 26, 0.84);
@@ -388,9 +389,11 @@ input:focus {
 }
 
 .captcha-image-large {
-  height: auto;
+  height: min(320px, 60vh);
   min-height: 220px;
   max-height: 320px;
+  object-fit: contain;
+  border-radius: 12px;
 }
 
 .memory-code {
