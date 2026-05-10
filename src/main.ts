@@ -26,7 +26,7 @@ type HiddenMapLocation = {
 
 type CaptchaAsset = {
   code: string;
-  file: string;
+  url: string;
 };
 
 type FloatingTimer = {
@@ -37,7 +37,7 @@ type FloatingTimer = {
 
 type AppState = {
   captchaExpectedCode: string;
-  captchaImageFile: string;
+  captchaImageUrl: string;
   checksumDeadlineAt: number;
   checksumTarget: number;
   codeEntryDeadlineAt: number;
@@ -58,7 +58,7 @@ type AppState = {
   stage: Stage;
 };
 
-const STORAGE_KEY = "troll-verification-state-v5";
+const STORAGE_KEY = "troll-verification-state-v6";
 const INTRO_BASE_HOLD_MS = 3000;
 const CHECKSUM_DEADLINE_MS = 30000;
 const MEMORY_REVEAL_MS = 7000;
@@ -68,8 +68,11 @@ const HOTLINE_MENU_DELAY_MS = 7000;
 const HOTLINE_RESPONSE_WINDOW_MS = 6000;
 const LUNGAU_MAP_PADDING_RATIO = 0.22;
 const solvedPuzzle = [1, 2, 3, 4, 5, 6, 7, 8, 0];
-const ASSET_BASE = import.meta.env.BASE_URL;
-const puzzleImageUrl = `${ASSET_BASE}captcha-assets/capthaimages/112.jpg`;
+const captchaImageModules = import.meta.glob("./capthaimages/*.{png,jpg,jpeg,webp}", {
+  eager: true,
+  import: "default",
+}) as Record<string, string>;
+const puzzleImageUrl = Object.values(captchaImageModules)[0] || "";
 
 const encouragementTips = [
   "Wenn man sich konzentriert, funktioniert es besser.",
@@ -104,18 +107,12 @@ const lungauTargets: HiddenMapLocation[] = [
   { name: "Unternberg", coords: [47.1124, 13.7411] },
 ];
 
-const captchaAssets: CaptchaAsset[] = [
-  { code: "001", file: "1.jpg" },
-  { code: "003", file: "3.png" },
-  { code: "007", file: "7.png" },
-  { code: "008", file: "8.png" },
-  { code: "010", file: "10.png" },
-  { code: "011", file: "11.png" },
-  { code: "012", file: "12.png" },
-  { code: "019", file: "19.png" },
-  { code: "112", file: "112.jpg" },
-  { code: "A-17", file: "a.png" },
-];
+const captchaAssets: CaptchaAsset[] = Object.entries(captchaImageModules)
+  .map(([path, url]) => ({
+    code: path.replace(/^.*[\\/]/, "").replace(/\.[^.]+$/, "").toUpperCase(),
+    url,
+  }))
+  .sort((left, right) => left.code.localeCompare(right.code));
 
 const activeTimeouts: number[] = [];
 const activeIntervals: number[] = [];
@@ -139,7 +136,7 @@ function createBaseState(): AppState {
     mapTargetLng: 0,
     mapClues: [],
     captchaExpectedCode: "",
-    captchaImageFile: "",
+    captchaImageUrl: "",
     checksumTarget: 0,
     checksumDeadlineAt: 0,
     memoryCode: "",
@@ -211,10 +208,6 @@ function persistState() {
 
 function setHTML(html: string) {
   appRoot.innerHTML = html;
-}
-
-function publicAsset(path: string) {
-  return `${ASSET_BASE}${path}`;
 }
 
 function escapeHTML(value: string) {
@@ -337,14 +330,21 @@ function getLungauMapBounds() {
   return L.latLngBounds(lungauTargets.map((location) => location.coords)).pad(LUNGAU_MAP_PADDING_RATIO);
 }
 
-function numericCodePart(code: string) {
-  return code.replace(/\D/g, "");
-}
-
-function digitSum(code: string) {
-  return numericCodePart(code)
+function captchaCodeValue(code: string) {
+  return code
+    .toUpperCase()
     .split("")
-    .reduce((sum, digit) => sum + Number(digit), 0);
+    .reduce((sum, char) => {
+      if (/\d/.test(char)) {
+        return sum + Number(char);
+      }
+
+      if (/[A-Z]/.test(char)) {
+        return sum + char.charCodeAt(0) - 64;
+      }
+
+      return sum;
+    }, 0);
 }
 
 function getCaptchaAssetByCode(code: string) {
@@ -400,18 +400,21 @@ function buildUniqueMapClues(target: HiddenMapLocation) {
 }
 
 function buildCaptchaChallenge() {
-  const eligibleAssets = captchaAssets.filter((asset) => /^\d+$/.test(asset.code));
-  const asset = eligibleAssets[Math.floor(Math.random() * eligibleAssets.length)] || captchaAssets[0];
+  const asset = captchaAssets[Math.floor(Math.random() * captchaAssets.length)];
+
+  if (!asset) {
+    throw new Error("No captcha assets available");
+  }
 
   return {
     captchaExpectedCode: asset.code,
-    captchaImageFile: asset.file,
+    captchaImageUrl: asset.url,
   };
 }
 
 function calculateChecksum(mapClues: MapClue[], targetName: string, captchaCode: string) {
   const roundedDistanceSum = mapClues.reduce((sum, clue) => sum + Math.round(clue.distanceKm), 0);
-  return roundedDistanceSum + countNameLetters(targetName) - digitSum(captchaCode);
+  return roundedDistanceSum + countNameLetters(targetName) - captchaCodeValue(captchaCode);
 }
 
 function buildSessionChallenge() {
@@ -981,7 +984,7 @@ function renderMap() {
 
 function renderCaptcha() {
   const asset = getCaptchaAssetByCode(state.captchaExpectedCode);
-  const imageFile = state.captchaImageFile || asset?.file || "";
+  const imageUrl = state.captchaImageUrl || asset?.url || "";
 
   setScreen(`
     <main class="screen">
@@ -999,7 +1002,7 @@ function renderCaptcha() {
           <div class="captcha-card">
             <img
               class="captcha-image captcha-image-large"
-              src="${publicAsset(`captcha-assets/capthaimages/${encodeURIComponent(imageFile)}`)}"
+              src="${imageUrl}"
               alt="Captcha-Code"
             />
           </div>
@@ -1018,7 +1021,7 @@ function renderCaptcha() {
     event.preventDefault();
 
     const input = document.querySelector<HTMLInputElement>("#captchaInput");
-    const value = input?.value.trim() || "";
+    const value = input?.value.trim().toUpperCase() || "";
 
     if (value === state.captchaExpectedCode) {
       startChecksumStage();
@@ -1062,12 +1065,12 @@ function renderChecksum() {
             <span class="status-value">${escapeHTML(state.mapTargetName)} = ${targetLetters}</span>
           </div>
           <div class="status-row">
-            <span class="status-label">Ziffernsumme des Captcha-Codes</span>
-            <span class="status-value">${digitSum(state.captchaExpectedCode)}</span>
+            <span class="status-label">Codewert des Captcha-Codes</span>
+            <span class="status-value">${captchaCodeValue(state.captchaExpectedCode)}</span>
           </div>
           <div class="status-row">
             <span class="status-label">Gesucht</span>
-            <span class="status-value">${roundedDistanceSum} + ${targetLetters} - ${digitSum(state.captchaExpectedCode)}</span>
+            <span class="status-value">${roundedDistanceSum} + ${targetLetters} - ${captchaCodeValue(state.captchaExpectedCode)}</span>
           </div>
           <div class="status-row">
             <span class="status-label">Restzeit</span>
