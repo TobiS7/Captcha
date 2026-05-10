@@ -1055,6 +1055,9 @@ function renderChecksum() {
         <p>
           Rechnen Sie sauber. Die benoetigten Werte stehen hier. Eine falsche Zahl oder ein Fristablauf setzt alles zurueck.
         </p>
+        <p>
+          Tragen Sie unten die eine resultierende ganze Zahl ein, die sich aus der Zeile <span class="mono">Gesucht</span> ergibt.
+        </p>
         <div class="status-list">
           <div class="status-row">
             <span class="status-label">Gerundete Distanzwerte</span>
