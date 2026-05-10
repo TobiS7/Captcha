@@ -27,6 +27,7 @@ html {
 body {
   margin: 0;
   min-width: 320px;
+  overflow-x: hidden;
   font-family: "Bahnschrift", "Segoe UI", "Arial Nova", sans-serif;
   color: var(--text);
   background:
@@ -495,18 +496,21 @@ input:focus {
 @media (max-width: 720px) {
   .floating-chrome {
     inset: 12px 12px auto;
+    gap: 10px;
   }
 
   .floating-panel {
     width: calc(100vw - 24px);
+    padding: 10px 12px;
   }
 
   .screen {
-    padding: 164px 18px 108px;
+    padding: 156px 16px 96px;
   }
 
   .card {
-    padding: 22px;
+    width: 100%;
+    padding: 22px 18px;
     border-radius: 18px;
   }
 
@@ -517,24 +521,167 @@ input:focus {
     align-items: flex-start;
   }
 
+  .card-header {
+    gap: 10px;
+  }
+
+  .badge {
+    white-space: normal;
+  }
+
   .status-value {
     text-align: left;
   }
 
   #map {
-    height: 380px;
+    height: 360px;
   }
 
   .captcha-grid {
     grid-template-columns: 1fr;
   }
 
+  .captcha-card {
+    width: 100%;
+    padding: 14px;
+  }
+
+  .captcha-image-large {
+    height: min(280px, 42vh);
+    min-height: 200px;
+  }
+
   .keypad {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
   }
 
   .memory-code {
     letter-spacing: 0.14em;
     font-size: 2rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .floating-label {
+    font-size: 0.68rem;
+  }
+
+  .floating-countdown,
+  .floating-tip {
+    font-size: 0.96rem;
+  }
+
+  .screen {
+    min-height: 100dvh;
+    padding: 148px 12px 72px;
+    place-items: start center;
+  }
+
+  .card {
+    padding: 18px 14px;
+    border-radius: 16px;
+  }
+
+  h1 {
+    font-size: clamp(1.7rem, 7vw, 2.1rem);
+  }
+
+  p {
+    font-size: 0.96rem;
+    line-height: 1.54;
+  }
+
+  button,
+  .download {
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 16px;
+  }
+
+  input {
+    padding: 14px;
+  }
+
+  .status-row {
+    gap: 8px;
+    padding: 11px 12px;
+  }
+
+  #map {
+    height: 320px;
+    margin: 14px 0 12px;
+  }
+
+  .map-label {
+    font-size: 0.72rem;
+    padding: 2px 5px;
+  }
+
+  .captcha-card {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .captcha-image-large {
+    height: min(240px, 36vh);
+    min-height: 180px;
+  }
+
+  .memory-code {
+    padding: 18px 12px;
+    font-size: 1.7rem;
+    letter-spacing: 0.1em;
+  }
+
+  .puzzle-board {
+    gap: 8px;
+  }
+
+  .puzzle-tile {
+    border-radius: 12px;
+  }
+
+  .robot {
+    padding: 14px;
+  }
+
+  .key {
+    min-height: 60px;
+    font-size: 1.2rem;
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 400px) {
+  .floating-chrome {
+    inset: 10px 10px auto;
+  }
+
+  .floating-panel {
+    width: calc(100vw - 20px);
+    padding: 9px 10px;
+  }
+
+  .screen {
+    padding: 140px 10px 60px;
+  }
+
+  .card {
+    padding: 16px 12px;
+  }
+
+  #map {
+    height: 280px;
+  }
+
+  .memory-code {
+    font-size: 1.45rem;
+    letter-spacing: 0.08em;
+  }
+
+  .captcha-image-large {
+    height: min(220px, 34vh);
+    min-height: 168px;
   }
 }
