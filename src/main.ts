@@ -1,6 +1,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./style.css";
+import puzzleImageUrl from "../kaze_elza.jpg";
 
 type Stage =
   | "intro"
@@ -72,7 +73,6 @@ const captchaImageModules = import.meta.glob("./capthaimages/*.{png,jpg,jpeg,web
   eager: true,
   import: "default",
 }) as Record<string, string>;
-const puzzleImageUrl = Object.values(captchaImageModules)[0] || "";
 
 const encouragementTips = [
   "Wenn man sich konzentriert, funktioniert es besser.",
