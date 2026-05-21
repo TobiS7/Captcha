@@ -68,6 +68,7 @@ const PUZZLE_DEADLINE_MS = 85000;
 const CODE_ENTRY_DEADLINE_MS = 22000;
 const HOTLINE_MENU_DELAY_MS = 7000;
 const HOTLINE_RESPONSE_WINDOW_MS = 6000;
+const JUMPSCARE_DURATION_MS = 650;
 const LUNGAU_MAP_PADDING_RATIO = 0.22;
 const BIRTHDAY_LINK_KEY = 73;
 const BIRTHDAY_LINK_DATA = [
@@ -128,6 +129,7 @@ const captchaAssets: CaptchaAsset[] = Object.entries(captchaImageModules)
 
 const activeTimeouts: number[] = [];
 const activeIntervals: number[] = [];
+let birthdayPhotoPreload: HTMLImageElement | null = null;
 
 const app = document.querySelector<HTMLDivElement>("#app");
 
@@ -266,6 +268,18 @@ function scheduleTimeout(callback: () => void, delayMs: number) {
 function scheduleInterval(callback: () => void, delayMs: number) {
   const interval = window.setInterval(callback, delayMs);
   activeIntervals.push(interval);
+}
+
+function primeBirthdayPhoto() {
+  if (birthdayPhotoPreload || typeof Image === "undefined") {
+    return;
+  }
+
+  const image = new Image();
+  image.decoding = "sync";
+  image.loading = "eager";
+  image.src = birthdayPhotoUrl;
+  birthdayPhotoPreload = image;
 }
 
 function decodeBirthdayLink() {
@@ -1373,15 +1387,23 @@ function renderHotline() {
 }
 
 function renderJumpscare() {
+  primeBirthdayPhoto();
+
   setHTML(`
     <main class="screen danger jump-screen">
-      <img class="jump-photo jump-photo-fullscreen" src="${birthdayPhotoUrl}" alt="Interne Alarmstufe" />
+      <img
+        class="jump-photo jump-photo-fullscreen"
+        src="${birthdayPhotoUrl}"
+        alt="Interne Alarmstufe"
+        decoding="sync"
+        fetchpriority="high"
+      />
     </main>
   `);
 
   scheduleTimeout(() => {
     setStage("download");
-  }, 1700);
+  }, JUMPSCARE_DURATION_MS);
 }
 
 function renderDownload() {
@@ -1415,4 +1437,5 @@ function renderDownload() {
   });
 }
 
+primeBirthdayPhoto();
 render();
