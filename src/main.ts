@@ -88,24 +88,24 @@ const captchaImageModules = import.meta.glob("./capthaimages/*.{png,jpg,jpeg,web
 
 const encouragementTips = [
   "Wenn man sich konzentriert, funktioniert es besser.",
-  "Du musst nur an dich glauben. Der Verifikator tut das bereits nicht.",
+  "Du musst nur an dich glauben.",
   "Eine ruhige Hand verhindert keinen Reset, hilft aber beim Klicken.",
-  "Fast geschafft ist ein Gefuehl, kein verfahrensrelevanter Status.",
-  "Wer jetzt sauber bleibt, darf vielleicht gleich mit einem Roboter sprechen.",
+  "Fast geschafft! Lass nicht locker.",
+  "Immer sauber bleiben!",
   "Jeder Reset ist formal betrachtet nur ein neuer Anfang.",
 ];
 
 const stageTips: Record<Stage, string> = {
   intro: "Die Verifikation wartet geduldig darauf, dass Sie sich sammeln.",
-  map: "Exakte Distanzhinweise sind eine seltene Form amtlicher Freundlichkeit.",
-  captcha: "Wenn Sie den sichtbaren Code sauber lesen, ist diese Stufe loesbar.",
-  checksum: "Jetzt hilft sauberes Rechnen mehr als Hoffnung.",
-  memory: "Ein kurzer Blick kann ausreichen, wenn man ihn ernst nimmt.",
+  map: "Die genauen Distanzhinweise sind eine seltene Form amtlicher Freundlichkeit.",
+  captcha: "Wenn Sie den sichtbaren Code sauber lesen, ist diese Stufe lösbar.",
+  checksum: "Die Hoffnung stirbt zuletzt.",
+  memory: "Streng dich an!",
   puzzle: "Hektik bewegt viele Kacheln, aber nicht unbedingt die richtigen.",
-  code: "Wer den Code wirklich gemerkt hat, muss jetzt nur noch ruhig bleiben.",
-  hotline: "Die letzte Huerde ist oft nur Timing mit formaler Ernsthaftigkeit.",
-  jumpscare: "Der Verifikator bleibt dramatisch, auch wenn Sie bereits gewonnen haben.",
-  download: "Amtliche Anerkennung ist selten herzlich, aber sie zaehlt.",
+  code: "Kühlen Kopf bewahrt ?!",
+  hotline: "Bitte drücken Sie die 1.",
+  jumpscare: "Immer weiter so. Nicht aufgeben!",
+  download: "Ich bin beeindruckt, wie souverän Sie mit dieser schwierigen Situation umgegangen sind.",
 };
 
 const lungauTargets: HiddenMapLocation[] = [
@@ -1000,15 +1000,13 @@ function renderMap() {
     });
 
     marker.on("click", () => {
-      const targetCoords: [number, number] = [state.mapTargetLat, state.mapTargetLng];
-
       if (location.name === state.mapTargetName) {
         startCaptchaStage();
         return;
       }
 
       forceRestart(
-        `Falscher Ort: ${location.name}. Ihre Auswahl lag ${getDistanceKm(location.coords, targetCoords).toFixed(2)} km von der internen Referenz entfernt.`,
+        `Falscher Ort: ${location.name} | Richtige Antwort wäre ${state.mapTargetName} gewesen.`,
       );
     });
   });
@@ -1060,7 +1058,7 @@ function renderCaptcha() {
       return;
     }
 
-    forceRestart(`Falscher Captcha-Code: ${value || "(leer)"}.`);
+    forceRestart(`Richtiger Captcha Code wäre ${state.captchaExpectedCode} gewesen.`);
   });
 }
 
@@ -1133,7 +1131,7 @@ function renderChecksum() {
       return;
     }
 
-    forceRestart(`Falsche Pruefsumme: ${input?.value.trim() || "(leer)"}.`);
+    forceRestart(`Die richtige Prüfsumme wäre ${state.checksumTarget} gewesen.`);
   });
 }
 
@@ -1303,7 +1301,7 @@ function renderCode() {
       return;
     }
 
-    forceRestart(`Falscher Sicherheitscode: ${value || "(leer)"}.`);
+    forceRestart(`Richtiger Sicherheitscode wäre ${state.memoryCode} gewesen.`);
   });
 }
 
@@ -1324,10 +1322,10 @@ function renderHotline() {
           <span class="eyebrow">Abschlusspruefung</span>
           <span class="badge">Verifikationshotline</span>
         </div>
-        <h1>Auf Ansage warten und 1 druecken</h1>
+        <h1>BITTE DRÜCKEN SIE DIE 1</h1>
         <p class="robot">
-          Willkommen beim automatisierten Hilfesystem. Wenn Sie ein Problem haben, druecken Sie die 1.
-          Vorzeitige oder falsche Eingaben werden als endgueltiger Bedienfehler gewertet.
+          Willkommen beim automatisierten Hilfesystem. Wenn Sie ein Problem haben, drücken Sie die 1.
+          Vorzeitige oder falsche Eingaben werden als endgültiger Bedienfehler gewertet.
         </p>
         <div class="status-list">
           <div class="status-row">
@@ -1401,7 +1399,7 @@ function renderDownload() {
         <p>
           Sie haben den kompletten Durchlauf ohne Fehler bestanden. Das System erkennt Ihre Leistung widerwillig an und leitet Sie jetzt zur eigentlichen Ueberraschung weiter.
         </p>
-        <div class="notice">Offizieller Status: bestanden. Art des Bestehens: hart, aber fair.</div>
+        <div class="notice">Offizieller Status: bestanden.</div>
         <button id="birthdayLink" class="download">Zur Geburtstagsueberraschung</button>
         <button id="reset" class="secondary">Neuen Durchlauf starten</button>
       </div>
