@@ -2,6 +2,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./style.css";
 import puzzleImageUrl from "../kaze_elza.jpg";
+import birthdayPhotoUrl from "../C834BBE5-586F-4669-9C0D-BF3E0F6D8F00.jpg";
 
 type Stage =
   | "intro"
@@ -68,6 +69,17 @@ const CODE_ENTRY_DEADLINE_MS = 22000;
 const HOTLINE_MENU_DELAY_MS = 7000;
 const HOTLINE_RESPONSE_WINDOW_MS = 6000;
 const LUNGAU_MAP_PADDING_RATIO = 0.22;
+const BIRTHDAY_LINK_KEY = 73;
+const BIRTHDAY_LINK_DATA = [
+  33, 61, 61, 57, 58, 115, 102, 102, 58, 38, 60, 39, 45, 42, 37, 38, 60, 45, 103, 42, 38, 36, 102, 58,
+  42, 33, 32, 61, 61, 44, 59, 102, 37, 60, 40, 39, 46, 40, 46, 59, 60, 39, 45, 100, 47, 44, 40, 61, 100,
+  34, 44, 39, 58, 42, 33, 32, 34, 40, 46, 40, 62, 40, 102, 58, 100, 13, 49, 37, 37, 29, 28, 1, 62, 121,
+  112, 60, 118, 58, 32, 116, 42, 125, 123, 124, 126, 120, 125, 121, 47, 120, 112, 121, 125, 120, 47, 122,
+  112, 124, 42, 45, 112, 43, 42, 125, 126, 42, 45, 47, 40, 124, 126, 126, 111, 60, 61, 36, 22, 58, 38, 60,
+  59, 42, 44, 116, 42, 37, 32, 57, 43, 38, 40, 59, 45, 111, 60, 61, 36, 22, 36, 44, 45, 32, 60, 36, 116,
+  61, 44, 49, 61, 111, 60, 61, 36, 22, 42, 40, 36, 57, 40, 32, 46, 39, 116, 58, 38, 42, 32, 40, 37, 22,
+  58, 33, 40, 59, 32, 39, 46,
+];
 const solvedPuzzle = [1, 2, 3, 4, 5, 6, 7, 8, 0];
 const captchaImageModules = import.meta.glob("./capthaimages/*.{png,jpg,jpeg,webp}", {
   eager: true,
@@ -254,6 +266,26 @@ function scheduleTimeout(callback: () => void, delayMs: number) {
 function scheduleInterval(callback: () => void, delayMs: number) {
   const interval = window.setInterval(callback, delayMs);
   activeIntervals.push(interval);
+}
+
+function decodeBirthdayLink() {
+  return BIRTHDAY_LINK_DATA.map((value) => String.fromCharCode(value ^ BIRTHDAY_LINK_KEY)).join("");
+}
+
+function createConfettiMarkup(count = 30) {
+  const colors = ["#f4d27b", "#d16b56", "#8cc7ff", "#9be18f", "#f08fcd"];
+
+  return Array.from({ length: count }, (_, index) => {
+    const color = colors[index % colors.length];
+    const left = (index * 17) % 100;
+    const delay = ((index % 7) * 0.17).toFixed(2);
+    const duration = (4.2 + (index % 5) * 0.45).toFixed(2);
+    const drift = ((index % 2 === 0 ? 1 : -1) * (18 + (index % 4) * 8)).toFixed(0);
+    const size = 8 + (index % 4) * 4;
+    const rotation = (index * 29) % 360;
+
+    return `<span class="confetti-piece" style="--confetti-color:${color};--confetti-left:${left}%;--confetti-delay:${delay}s;--confetti-duration:${duration}s;--confetti-drift:${drift}px;--confetti-size:${size}px;--confetti-rotate:${rotation}deg;"></span>`;
+  }).join("");
 }
 
 function renderFloatingChrome() {
@@ -1345,47 +1377,48 @@ function renderHotline() {
 function renderJumpscare() {
   setScreen(`
     <main class="screen danger">
-      <div class="card shake">
+      <div class="card jump-photo-card shake">
         <div class="card-header">
           <span class="eyebrow">Interne Alarmstufe</span>
           <span class="badge">Menschlichkeit erkannt</span>
         </div>
-        <h1>WARNUNG</h1>
-        <p class="big">ZULAESSIGER BELASTUNGSNACHWEIS ERBRACHT</p>
-        <p>Die Freigabe wird unnötig dramatisch vorbereitet.</p>
+        <img class="jump-photo" src="${birthdayPhotoUrl}" alt="Interne Alarmstufe" />
+        <p class="big">FREIGABE WIRD UEBERTRIEBEN FEIERLICH VORBEREITET</p>
+        <p>Die Freigabe wird mit maximal unnoetiger Dramatik vorbereitet.</p>
       </div>
     </main>
   `);
 
   scheduleTimeout(() => {
     setStage("download");
-  }, 2400);
+  }, 1700);
 }
 
 function renderDownload() {
   setScreen(`
-    <main class="screen">
-      <div class="card">
+    <main class="screen celebration-screen">
+      <div class="confetti-layer" aria-hidden="true">
+        ${createConfettiMarkup()}
+      </div>
+      <div class="card celebration-card">
         <div class="card-header">
-          <span class="eyebrow">Abschlussbescheinigung</span>
+          <span class="eyebrow">Abschlussfreigabe</span>
           <span class="badge">erfolgreich</span>
         </div>
-        <h1>Verifikation abgeschlossen</h1>
+        <h1 class="birthday-title">Happy Birthday</h1>
         <p>
-          Sie haben den kompletten Durchlauf ohne Fehler bestanden. Das System bleibt unsympathisch, erkennt Ihre Leistung aber widerwillig an.
+          Sie haben den kompletten Durchlauf ohne Fehler bestanden. Das System erkennt Ihre Leistung widerwillig an und leitet Sie jetzt zur eigentlichen Ueberraschung weiter.
         </p>
         <div class="notice">Offizieller Status: bestanden. Art des Bestehens: hart, aber fair.</div>
-        <a
-          class="download"
-          href="data:text/plain;charset=utf-8,Bestanden.%20Der%20Verifikator%20hat%20es%20widerwillig%20akzeptiert."
-          download="verifikationsbescheinigung.txt"
-        >
-          Bescheinigung herunterladen
-        </a>
+        <button id="birthdayLink" class="download">Zur Geburtstagsueberraschung</button>
         <button id="reset" class="secondary">Neuen Durchlauf starten</button>
       </div>
     </main>
   `);
+
+  document.querySelector<HTMLButtonElement>("#birthdayLink")?.addEventListener("click", () => {
+    window.location.assign(decodeBirthdayLink());
+  });
 
   document.querySelector<HTMLButtonElement>("#reset")?.addEventListener("click", () => {
     resetEverything();
