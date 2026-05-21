@@ -1375,17 +1375,9 @@ function renderHotline() {
 }
 
 function renderJumpscare() {
-  setScreen(`
-    <main class="screen danger">
-      <div class="card jump-photo-card shake">
-        <div class="card-header">
-          <span class="eyebrow">Interne Alarmstufe</span>
-          <span class="badge">Menschlichkeit erkannt</span>
-        </div>
-        <img class="jump-photo" src="${birthdayPhotoUrl}" alt="Interne Alarmstufe" />
-        <p class="big">FREIGABE WIRD UEBERTRIEBEN FEIERLICH VORBEREITET</p>
-        <p>Die Freigabe wird mit maximal unnoetiger Dramatik vorbereitet.</p>
-      </div>
+  setHTML(`
+    <main class="screen danger jump-screen">
+      <img class="jump-photo jump-photo-fullscreen" src="${birthdayPhotoUrl}" alt="Interne Alarmstufe" />
     </main>
   `);
 
